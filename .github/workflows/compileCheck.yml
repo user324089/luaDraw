@@ -1,0 +1,80 @@
+name: compile
+
+on: [push]
+
+jobs:
+  buildDebugLinux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: install dependencies
+      run: sudo apt install libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+    - name: makeBuildDir
+      run: cmake -E make_directory build
+
+    - name: useCmake
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+
+    - name: compile
+      run: cmake --build build
+
+  buildReleaseLinux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: install dependencies
+      run: sudo apt install libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+    - name: makeBuildDir
+      run: cmake -E make_directory build
+
+    - name: useCmake
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+    - name: compile
+      run: cmake --build build
+
+  buildDebugWindows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: makeBuildDir
+      run: cmake -E make_directory build
+
+    - name: useCmake
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+
+    - name: compile
+      run: cmake --build build
+
+  buildReleaseWindows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: makeBuildDir
+      run: cmake -E make_directory build
+
+    - name: useCmake
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+    - name: compile
+      run: cmake --build build
