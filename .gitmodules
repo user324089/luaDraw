@@ -1,0 +1,3 @@
+[submodule "myOpenglWrapper"]
+	path = myOpenglWrapper
+	url = https://github.com/user324089/myOpenglWrapper.git
