@@ -25,6 +25,12 @@ int main () {
     data.y = 1;
     data.pixelRadius = 10;
 
+    shapeDrawer::lineDrawingData dataLine;
+    dataLine.a = 1;
+    dataLine.b = 1;
+    dataLine.c = -2;
+    dataLine.pixelRadius = 10;
+
     sd.setPixelsPerUnit (100);
 
     while (!glfwWindowShouldClose (window)) {
@@ -37,7 +43,8 @@ int main () {
         glfwPollEvents ();
         glClearColor (1,0,0,1);
         glClear (GL_COLOR_BUFFER_BIT);
-        sd.drawPoint (data);
+        //sd.drawPoint (data);
+        sd.drawLine (dataLine);
         glfwSwapBuffers (window);
     }
 }

@@ -24,19 +24,25 @@ shapeDrawer::shapeDrawer () {
 
     } glBindVertexArray (0);
 
-    shader pointVertexShader (GL_VERTEX_SHADER);
-    pointVertexShader.make (1, &pointVertexShaderSource);
+    shader generalVertexShader (GL_VERTEX_SHADER);
+    generalVertexShader.make (1, &generalVertexShaderSource);
 
     shader pointFragmentShader (GL_FRAGMENT_SHADER);
     pointFragmentShader.make (1, &pointFragmentShaderSource);
 
-    pointProgram.make (pointVertexShader, pointFragmentShader);
+    shader lineFragmentShader (GL_FRAGMENT_SHADER);
+    lineFragmentShader.make (1, &lineFragmentShaderSource);
+
+    pointProgram.make (generalVertexShader, pointFragmentShader);
+    lineProgram.make (generalVertexShader, lineFragmentShader);
 
     uniformBuffer.data (uniformBufferRequiredSize, nullptr, GL_STATIC_DRAW);
 
     pointProgramPointUnitLocation = pointProgram.getUniformLocation ("pointUnit");
     pointProgramRadiusPixLocation = pointProgram.getUniformLocation ("radiusPix");
 
+    lineProgramEquationUnitLocation = lineProgram.getUniformLocation ("equationUnit");
+    lineProgramRadiusPixLocation = lineProgram.getUniformLocation ("radiusPix");
 }
 
 shapeDrawer::~shapeDrawer () {
@@ -63,6 +69,16 @@ void shapeDrawer::drawPoint (const pointDrawingData & data) {
     pointProgram.use ();
     glUniform2f (pointProgramPointUnitLocation, data.x, data.y);
     glUniform1f (pointProgramRadiusPixLocation, data.pixelRadius);
+    glBindVertexArray (VAO);
+    glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void shapeDrawer::drawLine (const lineDrawingData & data) {
+    updateUniformBuffer ();
+    uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);
+    lineProgram.use ();
+    glUniform3f (lineProgramEquationUnitLocation, data.a, data.b, data.c);
+    glUniform1f (lineProgramRadiusPixLocation, data.pixelRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
