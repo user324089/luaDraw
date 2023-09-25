@@ -84,11 +84,14 @@ void main () {
     vec2 centerToPointPix = (pointUnit - centerUnit) * pixelsPerUnit;
     vec2 centerToFragPix = fragPosition/2 * frameDimentionsPix;
     float distancePix = length (centerToPointPix-centerToFragPix);
-    if (distancePix < radiusPix) {
-        color = vec4 (0,0,1,1);
-    } else {
-        color = vec4 (0,1,0,1);
+
+    if (distancePix > radiusPix+1) {
+        discard;
     }
+
+    float alpha = 1 - smoothstep (radiusPix, radiusPix+1, distancePix);
+
+    color = vec4 (1,1,1,alpha);
 }
 )";
 
@@ -121,11 +124,13 @@ void main () {
     float distanceUnit = calculateDistanceUnit (fragmentUnit);
     float distancePix = distanceUnit * pixelsPerUnit;
 
-    if (distancePix < radiusPix) {
-        color = vec4 (0,0,1,1);
-    } else {
-        color = vec4 (0,1,0,1);
+    if (distancePix > radiusPix+1) {
+        discard;
     }
+
+    float alpha = 1 - smoothstep (radiusPix, radiusPix+1, distancePix);
+
+    color = vec4 (1,1,1,alpha);
 }
 )";
 
@@ -152,10 +157,12 @@ void main () {
     float distanceFromLineUnit = abs (circleCenterToFragmentUnit - circleCenterAndRadiusUnit.z);
     float distanceFromLinePix = distanceFromLineUnit * pixelsPerUnit;
 
-    if (distanceFromLinePix < lineRadiusPix) {
-        color = vec4 (0,0,1,1);
-    } else {
-        color = vec4 (0,1,0,1);
+    if (distanceFromLinePix > lineRadiusPix+1) {
+        discard;
     }
+
+    float alpha = 1 - smoothstep (lineRadiusPix, lineRadiusPix+1, distanceFromLinePix);
+
+    color = vec4 (1,1,1,alpha);
 }
 )";
