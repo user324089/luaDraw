@@ -33,8 +33,12 @@ shapeDrawer::shapeDrawer () {
     shader lineFragmentShader (GL_FRAGMENT_SHADER);
     lineFragmentShader.make (1, &lineFragmentShaderSource);
 
+    shader circleFragmentShader (GL_FRAGMENT_SHADER);
+    circleFragmentShader.make (1, &circleFragmentShaderSource);
+
     pointProgram.make (generalVertexShader, pointFragmentShader);
     lineProgram.make (generalVertexShader, lineFragmentShader);
+    circleProgram.make (generalVertexShader, circleFragmentShader);
 
     uniformBuffer.data (uniformBufferRequiredSize, nullptr, GL_STATIC_DRAW);
 
@@ -43,6 +47,9 @@ shapeDrawer::shapeDrawer () {
 
     lineProgramEquationUnitLocation = lineProgram.getUniformLocation ("equationUnit");
     lineProgramRadiusPixLocation = lineProgram.getUniformLocation ("radiusPix");
+
+    circleProgramCenterAndRadiusUnitLocation = circleProgram.getUniformLocation ("circleCenterAndRadiusUnit");
+    circleProgramLineRadiusPixLocation = circleProgram.getUniformLocation ("lineRadiusPix");
 }
 
 shapeDrawer::~shapeDrawer () {
@@ -79,6 +86,16 @@ void shapeDrawer::drawLine (const lineDrawingData & data) {
     lineProgram.use ();
     glUniform3f (lineProgramEquationUnitLocation, data.a, data.b, data.c);
     glUniform1f (lineProgramRadiusPixLocation, data.pixelRadius);
+    glBindVertexArray (VAO);
+    glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void shapeDrawer::drawCircle (const circleDrawingData & data) {
+    updateUniformBuffer ();
+    uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);
+    circleProgram.use ();
+    glUniform3f (circleProgramCenterAndRadiusUnitLocation, data.x, data.y, data.r);
+    glUniform1f (circleProgramLineRadiusPixLocation, data.pixelRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }

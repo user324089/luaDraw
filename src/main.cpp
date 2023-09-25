@@ -31,6 +31,12 @@ int main () {
     dataLine.c = -2;
     dataLine.pixelRadius = 10;
 
+    shapeDrawer::circleDrawingData dataCircle;
+    dataCircle.x = 1;
+    dataCircle.y = 1;
+    dataCircle.r = 4;
+    dataCircle.pixelRadius = 10;
+
     sd.setPixelsPerUnit (100);
 
     while (!glfwWindowShouldClose (window)) {
@@ -44,7 +50,8 @@ int main () {
         glClearColor (1,0,0,1);
         glClear (GL_COLOR_BUFFER_BIT);
         //sd.drawPoint (data);
-        sd.drawLine (dataLine);
+        //sd.drawLine (dataLine);
+        sd.drawCircle (dataCircle);
         glfwSwapBuffers (window);
     }
 }
