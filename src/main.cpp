@@ -5,6 +5,36 @@
 #include "texture.hpp"
 #include "frequentVerts.hpp"
 #include "shapeDrawer.hpp"
+#include "shapeStorage.hpp"
+
+void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
+
+    shapeDrawer::circleDrawingData circleData;
+    circleData.pixelRadius = 10;
+    for (shapeStorage::circleIterator iter = storage.circleBegin(); iter != storage.circleEnd(); iter++) {
+        circleData.x = iter->x;
+        circleData.y = iter->y;
+        circleData.r = iter->r;
+        drawer.drawCircle (circleData);
+    }
+
+    shapeDrawer::lineDrawingData lineData;
+    lineData.pixelRadius = 10;
+    for (shapeStorage::lineIterator iter = storage.lineBegin(); iter != storage.lineEnd(); iter++) {
+        lineData.a = iter->a;
+        lineData.b = iter->b;
+        lineData.c = iter->c;
+        drawer.drawLine (lineData);
+    }
+
+    shapeDrawer::pointDrawingData pointData;
+    pointData.pixelRadius = 12;
+    for (shapeStorage::pointIterator iter = storage.pointBegin(); iter != storage.pointEnd(); iter++) {
+        pointData.x = iter->x;
+        pointData.y = iter->y;
+        drawer.drawPoint (pointData);
+    }
+}
 
 int main () {
     glfwInit ();
@@ -22,23 +52,24 @@ int main () {
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     shapeDrawer sd;
+    shapeStorage ss;
 
-    shapeDrawer::pointDrawingData data;
-    data.x = 1;
-    data.y = 1;
-    data.pixelRadius = 10;
+    std::size_t testPointId = ss.newPoint ();
+    shapeStorage::point & testPoint = ss.getPoint (testPointId);;
+    testPoint.x = 1;
+    testPoint.y = 1;
 
-    shapeDrawer::lineDrawingData dataLine;
-    dataLine.a = 1;
-    dataLine.b = 1;
-    dataLine.c = -2;
-    dataLine.pixelRadius = 7;
+    std::size_t testLineId = ss.newLine ();
+    shapeStorage::line & testLine = ss.getLine (testLineId);;
+    testLine.a = 1;
+    testLine.b = 1;
+    testLine.c = -2;
 
-    shapeDrawer::circleDrawingData dataCircle;
-    dataCircle.x = 1;
-    dataCircle.y = 1;
-    dataCircle.r = 4;
-    dataCircle.pixelRadius = 7;
+    std::size_t testCircleId = ss.newCircle ();
+    shapeStorage::circle & testCircle = ss.getCircle (testCircleId);;
+    testCircle.x = 1;
+    testCircle.y = 1;
+    testCircle.r = 4;
 
     sd.setPixelsPerUnit (100);
 
@@ -52,9 +83,9 @@ int main () {
         glfwPollEvents ();
         glClearColor (0,0,0,1);
         glClear (GL_COLOR_BUFFER_BIT);
-        sd.drawPoint (data);
-        sd.drawLine (dataLine);
-        sd.drawCircle (dataCircle);
+
+        drawShapes (ss, sd);
+
         glfwSwapBuffers (window);
     }
 }
