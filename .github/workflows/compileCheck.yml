@@ -11,6 +11,10 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - uses: leafo/gh-actions-lua@v10
+      with:
+        luaVersion: "5.4"
+
     - name: install dependencies
       run: sudo apt install libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
@@ -18,7 +22,7 @@ jobs:
       run: cmake -E make_directory build
 
     - name: useCmake
-      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+      run: cmake -B build -S . -DCMAKE_PREFIX_PATH="/home/runner/work/luaDraw/luaDraw/.lua/" -DCMAKE_BUILD_TYPE=Debug
 
     - name: compile
       run: cmake --build build
@@ -31,6 +35,10 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - uses: leafo/gh-actions-lua@v10
+      with:
+        luaVersion: "5.4"
+
     - name: install dependencies
       run: sudo apt install libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
@@ -38,7 +46,7 @@ jobs:
       run: cmake -E make_directory build
 
     - name: useCmake
-      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+      run: cmake -B build -S . -DCMAKE_PREFIX_PATH="/home/runner/work/luaDraw/luaDraw/.lua/" -DCMAKE_BUILD_TYPE=Release
 
     - name: compile
       run: cmake --build build
@@ -51,6 +59,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: leafo/gh-actions-lua@v10
+      with:
+        luaVersion: "5.4"
 
     - name: makeBuildDir
       run: cmake -E make_directory build
@@ -69,6 +83,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: leafo/gh-actions-lua@v10
+      with:
+        luaVersion: "5.4"
 
     - name: makeBuildDir
       run: cmake -E make_directory build

@@ -1,5 +1,5 @@
 add_executable (main main.cpp shapeDrawer.cpp shapeDrawer.hpp shapeStorage.cpp shapeStorage.hpp)
-target_include_directories (main PRIVATE ${GLFW_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${MY_OPENGL_WRAPPER_INCLUDE_DIR})
-target_link_libraries (main glfw glew_s ${OPENGL_LIBRARIES} ${MY_OPENGL_WRAPPER_LIBRARIES})
+target_include_directories (main PRIVATE ${GLFW_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${MY_OPENGL_WRAPPER_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
+target_link_libraries (main glfw glew_s ${OPENGL_LIBRARIES} ${MY_OPENGL_WRAPPER_LIBRARIES} ${LUA_LIBRARIES})
 target_compile_definitions (main PRIVATE GLEW_NO_GLU)
 target_compile_features(main PRIVATE cxx_std_17)

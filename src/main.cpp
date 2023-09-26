@@ -7,6 +7,12 @@
 #include "shapeDrawer.hpp"
 #include "shapeStorage.hpp"
 
+extern "C" {
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+}
+
 void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 
     shapeDrawer::circleDrawingData circleData;
@@ -37,6 +43,11 @@ void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 }
 
 int main () {
+    lua_State *L;
+    L = luaL_newstate();
+    luaL_openlibs (L);
+    lua_close (L);
+
     glfwInit ();
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 6);
