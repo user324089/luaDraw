@@ -4,16 +4,16 @@
 class shapeStorage {
     public:
         struct point {
-            float x, y;
-            std::string name;
+            float x = 0, y = 0;
+            std::string name = "";
         };
         struct line {
-            float a, b, c;
-            std::string name;
+            float a = 1, b = 0, c = 0;
+            std::string name = "";
         };
         struct circle {
-            float x, y, r;
-            std::string name;
+            float x = 0, y = 0, r = 1;
+            std::string name = "";
         };
     private:
         std::vector <point> pointInstances;
