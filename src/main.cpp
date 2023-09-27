@@ -6,12 +6,8 @@
 #include "frequentVerts.hpp"
 #include "shapeDrawer.hpp"
 #include "shapeStorage.hpp"
+#include "configInterpreter.hpp"
 
-extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-}
 
 void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 
@@ -42,11 +38,9 @@ void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
     }
 }
 
+
 int main () {
-    lua_State *L;
-    L = luaL_newstate();
-    luaL_openlibs (L);
-    lua_close (L);
+
 
     glfwInit ();
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -63,24 +57,36 @@ int main () {
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     shapeDrawer sd;
-    shapeStorage ss;
+    //shapeStorage ss;
 
-    std::size_t testPointId = ss.newPoint ();
-    shapeStorage::point & testPoint = ss.getPoint (testPointId);;
-    testPoint.x = 1;
-    testPoint.y = 1;
+    shapeStorage mainShapeStorage;
 
-    std::size_t testLineId = ss.newLine ();
-    shapeStorage::line & testLine = ss.getLine (testLineId);;
-    testLine.a = 1;
-    testLine.b = 1;
-    testLine.c = -2;
 
-    std::size_t testCircleId = ss.newCircle ();
-    shapeStorage::circle & testCircle = ss.getCircle (testCircleId);;
-    testCircle.x = 1;
-    testCircle.y = 1;
-    testCircle.r = 4;
+    const char * luaProgram = R"(
+pt = luaDraw.newPoint();
+print('printing pt.x', pt.x)
+pt.x = 1.3;
+print('printing pt.x', pt.x)
+
+pt2 = luaDraw.newPoint();
+print('printing pt2.x', pt2.x)
+pt2.x = -3.2;
+print('printing pt2.x', pt2.x)
+
+l1 = luaDraw.newLine();
+l1.a = 1
+l1.b = 0.1
+l1.c = 0
+
+c1 = luaDraw.newCircle()
+c1.x = 1
+c1.y = 1
+c1.r = 4
+)";
+
+
+    configInterpreter mainConfigInterpreter (mainShapeStorage);
+    mainConfigInterpreter.setupFromString (luaProgram);
 
     sd.setPixelsPerUnit (100);
 
@@ -95,7 +101,8 @@ int main () {
         glClearColor (0,0,0,1);
         glClear (GL_COLOR_BUFFER_BIT);
 
-        drawShapes (ss, sd);
+        //drawShapes (ss, sd);
+        drawShapes (mainShapeStorage, sd);
 
         glfwSwapBuffers (window);
     }
