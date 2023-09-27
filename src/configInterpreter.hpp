@@ -12,6 +12,7 @@ class configInterpreter {
     private:
         lua_State * L;
         shapeStorage & configuredShapeStorage;
+        shapeStorage::sizeMemento configuredShapeStorageMementoAfterSetup;
 
         static int newPoint (lua_State * L);
         static int newLine (lua_State * L);
@@ -29,13 +30,16 @@ class configInterpreter {
         static const luaL_Reg pointMetaTableFunctions [];
         static const luaL_Reg lineMetaTableFunctions [];
         static const luaL_Reg circleMetaTableFunctions [];
+
+        void runUpdateFunction ();
+
     public:
         configInterpreter (shapeStorage & _configuredShapeStorage);
         void setupFromString (const std::string luaText);
         void setupFromFile (const std::string filename);
+        void update ();
         ~configInterpreter ();
 
-        void update ();
 };
 
 inline constexpr luaL_Reg configInterpreter::luaDrawModuleFunctions [] = {

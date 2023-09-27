@@ -29,16 +29,39 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage) : 
     lua_pop (L, 1);
 }
 
+void configInterpreter::runUpdateFunction () {
+    lua_getglobal (L, "Update");
+    if (lua_isnil(L, -1)) {
+        lua_pop (L, 1);
+        return;
+    }
+    if (!lua_isfunction(L, -1)) {
+        throw std::runtime_error ("Update is not a function");
+    }
+    if (lua_pcall(L, 0, 0, 0)) {
+        throw std::runtime_error (std::string ("Error calling update: ") + lua_tostring(L, -1));
+    }
+}
+
 void configInterpreter::setupFromString (const std::string luaText) {
     if (luaL_loadstring (L, luaText.c_str()) || lua_pcall (L, 0, 0, 0)) {
         throw std::runtime_error(std::string ("config reading error: ") + lua_tostring(L, -1));
     }
+    configuredShapeStorageMementoAfterSetup = configuredShapeStorage.exportSize();
+    runUpdateFunction ();
 }
 
 void configInterpreter::setupFromFile (const std::string filename) {
     if (luaL_loadfile (L, filename.c_str()) || lua_pcall (L, 0, 0, 0)) {
         throw std::runtime_error(std::string ("config reading error: ") + lua_tostring(L, -1));
     }
+    configuredShapeStorageMementoAfterSetup = configuredShapeStorage.exportSize();
+    runUpdateFunction ();
+}
+
+void configInterpreter::update () {
+    configuredShapeStorage.importSize (configuredShapeStorageMementoAfterSetup);
+    runUpdateFunction ();
 }
 
 configInterpreter::~configInterpreter () {

@@ -1,4 +1,5 @@
 #include "shapeStorage.hpp"
+#include <stdexcept>
 
 shapeStorage::sizeMemento shapeStorage::exportSize () {
     sizeMemento result;
@@ -7,11 +8,18 @@ shapeStorage::sizeMemento shapeStorage::exportSize () {
     result.circleNum = circleInstances.size();
     return result;
 };
+
 void shapeStorage::importSize (const sizeMemento & memento) {
-    pointInstances.reserve (memento.pointNum);
-    lineInstances.reserve (memento.lineNum);
-    circleInstances.reserve (memento.circleNum);
+    if (memento.pointNum > pointInstances.size() ||
+            memento.lineNum > lineInstances.size() ||
+            memento.circleNum > circleInstances.size()) {
+        throw std::runtime_error ("shape storage cannot import bigger size than it has");
+    }
+    pointInstances.resize (memento.pointNum);
+    lineInstances.resize (memento.lineNum);
+    circleInstances.resize (memento.circleNum);
 };
+
 std::size_t shapeStorage::newPoint () {
     std::size_t id = pointInstances.size();
     pointInstances.emplace_back ();

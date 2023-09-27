@@ -8,7 +8,6 @@
 #include "shapeStorage.hpp"
 #include "configInterpreter.hpp"
 
-
 void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 
     shapeDrawer::circleDrawingData circleData;
@@ -82,6 +81,13 @@ c1 = luaDraw.newCircle()
 c1.x = 1
 c1.y = 1
 c1.r = 4
+
+function Update ()
+    pt3 = luaDraw.newPoint ();
+    pt3.x = c1.x;
+    pt3.y = c1.y;
+    c1.x = c1.x + 0.01
+end
 )";
 
 
@@ -96,6 +102,8 @@ c1.r = 4
         glfwGetFramebufferSize (window, &width, &height);
         glViewport (0,0,width, height);
         sd.setFrameDimentions (static_cast<float>(width), static_cast<float>(height));
+
+        mainConfigInterpreter.update ();
 
         glfwPollEvents ();
         glClearColor (0,0,0,1);
