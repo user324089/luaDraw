@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shapeStorage.hpp"
+#include <chrono>
 
 extern "C" {
 #include "lua.h"
@@ -26,12 +27,16 @@ class configInterpreter {
         static int setLineField (lua_State * L);
         static int setCircleField (lua_State * L);
 
+        static int getTime (lua_State * L);
+
         static const luaL_Reg luaDrawModuleFunctions [];
         static const luaL_Reg pointMetaTableFunctions [];
         static const luaL_Reg lineMetaTableFunctions [];
         static const luaL_Reg circleMetaTableFunctions [];
 
         void runUpdateFunction ();
+
+        std::chrono::time_point<std::chrono::high_resolution_clock> startTime = std::chrono::high_resolution_clock::now();
 
     public:
         configInterpreter (shapeStorage & _configuredShapeStorage);
@@ -46,6 +51,7 @@ inline constexpr luaL_Reg configInterpreter::luaDrawModuleFunctions [] = {
     {"newPoint", newPoint},
     {"newLine", newLine},
     {"newCircle", newCircle},
+    {"getTime", getTime},
     {NULL, NULL}
 };
 

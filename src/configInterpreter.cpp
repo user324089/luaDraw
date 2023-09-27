@@ -9,7 +9,8 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage) : 
     luaL_newlibtable (L, luaDrawModuleFunctions);
 
     lua_pushlightuserdata (L, &configuredShapeStorage);
-    luaL_setfuncs (L, luaDrawModuleFunctions, 1);
+    lua_pushlightuserdata (L, &startTime);
+    luaL_setfuncs (L, luaDrawModuleFunctions, 2);
 
     lua_setglobal (L, "luaDraw");
 
@@ -261,4 +262,15 @@ int configInterpreter::setCircleField (lua_State * L) {
         return 0;
     }
     return 0;
+}
+
+int configInterpreter::getTime (lua_State * L) {
+
+    auto startTimePtr = static_cast<decltype(startTime)*>(lua_touserdata (L, lua_upvalueindex(2)));
+    auto nowTime = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> passedTime {nowTime - *startTimePtr};
+
+    lua_pushnumber (L, passedTime.count());
+    return 1;
 }

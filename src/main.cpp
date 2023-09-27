@@ -83,10 +83,11 @@ c1.y = 1
 c1.r = 4
 
 function Update ()
+    c1.x = luaDraw.getTime();
+    c1.r = luaDraw.getTime();
     pt3 = luaDraw.newPoint ();
     pt3.x = c1.x;
     pt3.y = c1.y;
-    c1.x = c1.x + 0.01
 end
 )";
 
