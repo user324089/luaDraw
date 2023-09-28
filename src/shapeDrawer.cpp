@@ -82,6 +82,10 @@ void shapeDrawer::setPixelsPerUnit (float _pixelsPerUnit) {
     pixelsPerUnit = _pixelsPerUnit;
 }
 
+void shapeDrawer::enlargeView (float times) {
+    pixelsPerUnit *= times;
+}
+
 void shapeDrawer::drawPoint (const pointDrawingData & data) {
     updateUniformBuffer ();
     uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);

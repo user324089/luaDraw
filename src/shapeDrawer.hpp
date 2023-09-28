@@ -42,6 +42,7 @@ class shapeDrawer {
         void moveByUnits (float moveX, float moveY);
         void setFrameDimentions (float _frameWidth, float _frameHeight);
         void setPixelsPerUnit (float _pixelsPerUnit);
+        void enlargeView (float times);
         struct pointDrawingData {
             float x, y;
             float pixelRadius;

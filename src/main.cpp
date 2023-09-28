@@ -8,8 +8,10 @@
 #include "shapeStorage.hpp"
 #include "configInterpreter.hpp"
 #include "inputHandlers.hpp"
+#include <cmath>
 
 constexpr static float arrowMoveSpeed = 500;
+constexpr static float scrollEnlargeSpeed = 1.3f;
 
 void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 
@@ -40,6 +42,17 @@ void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
     }
 }
 
+struct windowData {
+    double scrolledX = 0, scrolledY = 0;
+};
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    windowData * data = static_cast<windowData*>(glfwGetWindowUserPointer (window));
+    data->scrolledX += xoffset;
+    data->scrolledY += yoffset;
+}
+
 int main () {
 
 
@@ -54,6 +67,9 @@ int main () {
     glewExperimental = GL_TRUE;
     glewInit ();
 
+    windowData mainWindowData;
+    glfwSetWindowUserPointer (window, &mainWindowData);
+
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -62,6 +78,7 @@ int main () {
 
     shapeStorage mainShapeStorage;
 
+    glfwSetScrollCallback(window, scroll_callback);
 
     const char * luaProgram = R"(
 pt = luaDraw.newPoint();
@@ -130,6 +147,9 @@ end
         }
 
         sd.moveByPixels (moveByPixelsX, moveByPixelsY);
+
+        sd.enlargeView (static_cast<float>(std::pow(scrollEnlargeSpeed, mainWindowData.scrolledY)));
+        mainWindowData.scrolledY = 0;
 
         int width, height;
         glfwGetFramebufferSize (window, &width, &height);
