@@ -38,6 +38,8 @@ class shapeDrawer {
         shapeDrawer ();
         ~shapeDrawer ();
         void setCenter (float _centerX, float _centerY);
+        void moveByPixels (float moveX, float moveY);
+        void moveByUnits (float moveX, float moveY);
         void setFrameDimentions (float _frameWidth, float _frameHeight);
         void setPixelsPerUnit (float _pixelsPerUnit);
         struct pointDrawingData {

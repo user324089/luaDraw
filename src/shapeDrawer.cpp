@@ -61,6 +61,18 @@ void shapeDrawer::setCenter (float _centerX, float _centerY) {
     centerY = _centerY;
 }
 
+void shapeDrawer::moveByPixels (float moveX, float moveY) {
+    float moveXUnit = moveX / pixelsPerUnit;
+    float moveYUnit = moveY / pixelsPerUnit;
+    centerX += moveXUnit;
+    centerY += moveYUnit;
+}
+
+void shapeDrawer::moveByUnits (float moveX, float moveY) {
+    centerX += moveX;
+    centerY += moveY;
+}
+
 void shapeDrawer::setFrameDimentions (float _frameWidth, float _frameHeight) {
     frameWidth = _frameWidth;
     frameHeight = _frameHeight;

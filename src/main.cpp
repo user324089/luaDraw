@@ -7,6 +7,9 @@
 #include "shapeDrawer.hpp"
 #include "shapeStorage.hpp"
 #include "configInterpreter.hpp"
+#include "inputHandlers.hpp"
+
+constexpr static float arrowMoveSpeed = 500;
 
 void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
 
@@ -36,7 +39,6 @@ void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
         drawer.drawPoint (pointData);
     }
 }
-
 
 int main () {
 
@@ -97,7 +99,37 @@ end
 
     sd.setPixelsPerUnit (100);
 
+    mouseMoveHandler mainMouseMoveHandler;
+
+    timePassedHandler mainTimePassedHandler (glfwGetTime ());
+
     while (!glfwWindowShouldClose (window)) {
+
+        mainTimePassedHandler.update (glfwGetTime());
+
+        bool isMousePressed = (glfwGetMouseButton (window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS);
+        double mouseX, mouseY;
+        glfwGetCursorPos (window, &mouseX, &mouseY);
+
+        mainMouseMoveHandler.update (isMousePressed, mouseX, mouseY);
+
+        float moveByPixelsX = -static_cast<float>(mainMouseMoveHandler.getMoveX());
+        float moveByPixelsY = static_cast<float>(mainMouseMoveHandler.getMoveY());
+
+        if (glfwGetKey (window, GLFW_KEY_UP) == GLFW_PRESS) {
+            moveByPixelsY += arrowMoveSpeed * static_cast<float>(mainTimePassedHandler.getDeltaTime());
+        }
+        if (glfwGetKey (window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            moveByPixelsY -= arrowMoveSpeed * static_cast<float>(mainTimePassedHandler.getDeltaTime());
+        }
+        if (glfwGetKey (window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            moveByPixelsX -= arrowMoveSpeed * static_cast<float>(mainTimePassedHandler.getDeltaTime());
+        }
+        if (glfwGetKey (window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            moveByPixelsX += arrowMoveSpeed * static_cast<float>(mainTimePassedHandler.getDeltaTime());
+        }
+
+        sd.moveByPixels (moveByPixelsX, moveByPixelsY);
 
         int width, height;
         glfwGetFramebufferSize (window, &width, &height);
