@@ -8,24 +8,23 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage) : 
 
     luaL_newlibtable (L, luaDrawModuleFunctions);
 
-    lua_pushlightuserdata (L, &configuredShapeStorage);
-    lua_pushlightuserdata (L, &startTime);
-    luaL_setfuncs (L, luaDrawModuleFunctions, 2);
+    lua_pushlightuserdata (L, this);
+    luaL_setfuncs (L, luaDrawModuleFunctions, 1);
 
     lua_setglobal (L, "luaDraw");
 
     luaL_newmetatable (L, "luaDraw.point");
-    lua_pushlightuserdata (L, &configuredShapeStorage);
+    lua_pushlightuserdata (L, this);
     luaL_setfuncs (L, pointMetaTableFunctions, 1);
     lua_pop (L, 1);
 
     luaL_newmetatable (L, "luaDraw.line");
-    lua_pushlightuserdata (L, &configuredShapeStorage);
+    lua_pushlightuserdata (L, this);
     luaL_setfuncs (L, lineMetaTableFunctions, 1);
     lua_pop (L, 1);
 
     luaL_newmetatable (L, "luaDraw.circle");
-    lua_pushlightuserdata (L, &configuredShapeStorage);
+    lua_pushlightuserdata (L, this);
     luaL_setfuncs (L, circleMetaTableFunctions, 1);
     lua_pop (L, 1);
 }
@@ -70,8 +69,8 @@ configInterpreter::~configInterpreter () {
 }
 
 int configInterpreter::newPoint (lua_State * L) {
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    std::size_t newId = storagePtr->newPoint();
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    std::size_t newId = self->configuredShapeStorage.newPoint();
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.point");
@@ -79,8 +78,8 @@ int configInterpreter::newPoint (lua_State * L) {
 }
 
 int configInterpreter::newLine (lua_State * L) {
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    std::size_t newId = storagePtr->newLine();
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    std::size_t newId = self->configuredShapeStorage.newLine();
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.line");
@@ -88,8 +87,8 @@ int configInterpreter::newLine (lua_State * L) {
 }
 
 int configInterpreter::newCircle (lua_State * L) {
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    std::size_t newId = storagePtr->newCircle();
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    std::size_t newId = self->configuredShapeStorage.newCircle();
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.circle");
@@ -106,8 +105,8 @@ int configInterpreter::getPointField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::point& p = storagePtr->getPoint (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::point& p = self->configuredShapeStorage.getPoint (*idPtr);
 
     if (field == "x" ) {
         lua_pushnumber (L, static_cast<double>(p.x));
@@ -132,8 +131,8 @@ int configInterpreter::setPointField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::point& p = storagePtr->getPoint (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::point& p = self->configuredShapeStorage.getPoint (*idPtr);
 
     if (field == "x" ) {
         p.x = static_cast<float>(luaL_checknumber (L, 3));
@@ -158,8 +157,8 @@ int configInterpreter::getLineField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::line& l = storagePtr->getLine (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::line& l = self->configuredShapeStorage.getLine (*idPtr);
 
     if (field == "a" ) {
         lua_pushnumber (L, static_cast<double>(l.a));
@@ -187,8 +186,8 @@ int configInterpreter::setLineField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::line& l = storagePtr->getLine (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::line& l = self->configuredShapeStorage.getLine (*idPtr);
 
     if (field == "a" ) {
         l.a = static_cast<float>(luaL_checknumber (L, 3));
@@ -216,8 +215,8 @@ int configInterpreter::getCircleField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::circle& c = storagePtr->getCircle (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::circle& c = self->configuredShapeStorage.getCircle (*idPtr);
 
     if (field == "x" ) {
         lua_pushnumber (L, static_cast<double>(c.x));
@@ -245,8 +244,8 @@ int configInterpreter::setCircleField (lua_State * L) {
 
     std::string field = lua_tostring(L, 2);
 
-    shapeStorage * storagePtr = static_cast<shapeStorage*>(lua_touserdata (L, lua_upvalueindex(1)));
-    shapeStorage::circle& c = storagePtr->getCircle (*idPtr);
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    shapeStorage::circle& c = self->configuredShapeStorage.getCircle (*idPtr);
 
     if (field == "x" ) {
         c.x = static_cast<float>(luaL_checknumber (L, 3));
@@ -266,10 +265,10 @@ int configInterpreter::setCircleField (lua_State * L) {
 
 int configInterpreter::getTime (lua_State * L) {
 
-    auto startTimePtr = static_cast<decltype(startTime)*>(lua_touserdata (L, lua_upvalueindex(2)));
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
     auto nowTime = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> passedTime {nowTime - *startTimePtr};
+    std::chrono::duration<double> passedTime {nowTime - self->startTime};
 
     lua_pushnumber (L, passedTime.count());
     return 1;
