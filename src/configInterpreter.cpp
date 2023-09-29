@@ -133,6 +133,13 @@ int configInterpreter::getPointField (lua_State * L) {
     } else if (field == "name") {
         lua_pushstring (L, p.name.c_str());
         return 1;
+    } else if (field == "color") {
+        if (p.color == -1) {
+            lua_pushnil (L);
+            return 1;
+        }
+        lua_rawgeti (L, LUA_REGISTRYINDEX, self->configuredColorStorage.getColor (p.color).luaIndex);
+        return 1;
     }
     lua_pushnil (L);
     return 1;
@@ -191,6 +198,13 @@ int configInterpreter::getLineField (lua_State * L) {
         return 1;
     } else if (field == "name") {
         lua_pushstring (L, l.name.c_str());
+        return 1;
+    } else if (field == "color") {
+        if (l.color == -1) {
+            lua_pushnil (L);
+            return 1;
+        }
+        lua_rawgeti (L, LUA_REGISTRYINDEX, self->configuredColorStorage.getColor (l.color).luaIndex);
         return 1;
     }
     lua_pushnil (L);
@@ -254,6 +268,13 @@ int configInterpreter::getCircleField (lua_State * L) {
     } else if (field == "name") {
         lua_pushstring (L, c.name.c_str());
         return 1;
+    } else if (field == "color") {
+        if (c.color == -1) {
+            lua_pushnil (L);
+            return 1;
+        }
+        lua_rawgeti (L, LUA_REGISTRYINDEX, self->configuredColorStorage.getColor (c.color).luaIndex);
+        return 1;
     }
     lua_pushnil (L);
     return 1;
@@ -308,6 +329,8 @@ int configInterpreter::newColor (lua_State * L) {
     int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.color");
+    lua_pushvalue (L, -1);
+    self->configuredColorStorage.getColor (newId).luaIndex = luaL_ref (L, LUA_REGISTRYINDEX);
     return 1;
 }
 

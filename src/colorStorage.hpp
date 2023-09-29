@@ -8,6 +8,7 @@ class colorStorage {
         struct color {
             buffer uniformColorBuffer;
             float colorComponents [4] = {0,0,0,0};
+            int luaIndex = -1;
             color ();
             void updateUniform ();
             void setComponents (const float * _colorComponents);
