@@ -2,27 +2,48 @@
 #include <stdexcept>
 #include <string>
 
-constexpr static std::size_t numberOfDefaultColors = 3;
+struct startingAvailableColor {
+    const char * name;
+    const float data [4];
+};
+
+constexpr static startingAvailableColor allStartingAvailableColors [] = {
+    {"red", {1,0,0,1}},
+    {"green", {0,1,0,1}},
+    {"blue", {0,0,1,1}},
+    {"cyan", {0,1,1,1}},
+    {"magenta", {1,0,1,1}},
+    {"yellow", {1,1,0,1}},
+    {"black", {0,0,0,1}},
+    {"white", {1,1,1,1}},
+    {"brown", {0.64f,0.16f,0.16f,1}},
+};
+
+constexpr static float defaultNewColor [] = {0,0,0,1};
+static void luaPushNewColor (lua_State * L, colorStorage & configuredColorStorage, const float * colorData = defaultNewColor) {
+    int newId = configuredColorStorage.newColor ();
+    int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(size_t)));
+    *idPtr = newId;
+    luaL_setmetatable (L, "luaDraw.color");
+
+    lua_pushnumber (L, static_cast<double>(colorData[0]));
+    lua_setfield (L, -2, "r");
+    lua_pushnumber (L, static_cast<double>(colorData[1]));
+    lua_setfield (L, -2, "g");
+    lua_pushnumber (L, static_cast<double>(colorData[2]));
+    lua_setfield (L, -2, "b");
+    lua_pushnumber (L, static_cast<double>(colorData[3]));
+    lua_setfield (L, -2, "a");
+
+    lua_pushvalue (L, -1);
+    configuredColorStorage.getColor (newId).luaIndex = luaL_ref (L, LUA_REGISTRYINDEX);
+}
 
 configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage)
     : configuredShapeStorage (_configuredShapeStorage), configuredColorStorage (_configuredColorStorage){
 
     L = luaL_newstate();
     luaL_openlibs (L);
-
-    luaL_newlibtable (L, luaDrawModuleFunctions);
-
-    lua_pushlightuserdata (L, this);
-    luaL_setfuncs (L, luaDrawModuleFunctions, 1);
-
-    lua_createtable (L, 0, numberOfDefaultColors); // colors table
-    lua_pushlightuserdata (L, this);
-    lua_pushcclosure (L, newColor, 1);
-    lua_setfield (L, -2, "newColor");
-
-    lua_setfield (L, -2, "colors");
-
-    lua_setglobal (L, "luaDraw");
 
     luaL_newmetatable (L, "luaDraw.color");
     lua_pushlightuserdata (L, this);
@@ -43,6 +64,27 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, co
     lua_pushlightuserdata (L, this);
     luaL_setfuncs (L, circleMetaTableFunctions, 1);
     lua_pop (L, 1);
+
+    luaL_newlibtable (L, luaDrawModuleFunctions);
+
+    lua_pushlightuserdata (L, this);
+    luaL_setfuncs (L, luaDrawModuleFunctions, 1);
+
+    int numStartingAvailableColors = sizeof(allStartingAvailableColors)/sizeof(startingAvailableColor);
+    lua_createtable (L, 0, numStartingAvailableColors); // colors table
+    lua_pushlightuserdata (L, this);
+    lua_pushcclosure (L, newColor, 1);
+    lua_setfield (L, -2, "newColor");
+
+    for (int i = 0; i < numStartingAvailableColors; i++) {
+        luaPushNewColor (L, configuredColorStorage, allStartingAvailableColors[i].data);
+        lua_setfield (L, -2, allStartingAvailableColors[i].name);
+    }
+
+    lua_setfield (L, -2, "colors");
+
+    lua_setglobal (L, "luaDraw");
+
 }
 
 void configInterpreter::runUpdateFunction () {
@@ -323,14 +365,11 @@ int configInterpreter::getTime (lua_State * L) {
     return 1;
 }
 
+
 int configInterpreter::newColor (lua_State * L) {
     configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
-    int newId = self->configuredColorStorage.newColor ();
-    int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(size_t)));
-    *idPtr = newId;
-    luaL_setmetatable (L, "luaDraw.color");
-    lua_pushvalue (L, -1);
-    self->configuredColorStorage.getColor (newId).luaIndex = luaL_ref (L, LUA_REGISTRYINDEX);
+    luaPushNewColor (L, self->configuredColorStorage);
+
     return 1;
 }
 

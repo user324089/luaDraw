@@ -78,6 +78,8 @@ col.r = 0.3
 col.g = 0.7
 c1.color = col
 
+pt.color = luaDraw.colors.brown
+
 function Update ()
     c1.x = luaDraw.getTime();
     c1.r = luaDraw.getTime();
