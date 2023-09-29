@@ -3,6 +3,11 @@
 #include <GL/glew.h>
 #include "buffer.hpp"
 #include "program.hpp"
+#include "shapeStorage.hpp"
+#include "colorStorage.hpp"
+
+constexpr float borderColorData [4] = {0.3f,0.3f,0.3f,1};
+constexpr float defaultColorData [4] = {1,0,1,1};
 
 class shapeDrawer {
     private:
@@ -34,6 +39,9 @@ class shapeDrawer {
         static const GLchar * const circleFragmentShaderSource;
 
         void updateUniformBuffer ();
+
+        colorStorage::color defaultColor;
+        colorStorage::color borderColor;
     public:
         shapeDrawer ();
         ~shapeDrawer ();
@@ -58,6 +66,8 @@ class shapeDrawer {
             float pixelRadius;
         };
         void drawCircle (const circleDrawingData & data);
+
+        void drawShapes (shapeStorage & drawnShapesStorage, colorStorage & usedColorStorage);
 };
 
 inline constexpr const GLchar * shapeDrawer::generalVertexShaderSource = R"(
@@ -81,6 +91,10 @@ layout (std140, binding=0) uniform drawInfo {
     float pixelsPerUnit;
 };
 
+layout (std140, binding=1) uniform colorInfo {
+    vec4 uniformColor;
+};
+
 uniform vec2 pointUnit; // coordinates of the point in units
 uniform float radiusPix; // radius of the point in pixels
 
@@ -96,7 +110,8 @@ void main () {
 
     float alpha = 1 - smoothstep (radiusPix, radiusPix+1, distancePix);
 
-    color = vec4 (1,1,1,alpha);
+    color = uniformColor;
+    color.a *= alpha;
 }
 )";
 
@@ -109,6 +124,10 @@ layout (std140, binding=0) uniform drawInfo {
     vec2 centerUnit;
     vec2 frameDimentionsPix;
     float pixelsPerUnit;
+};
+
+layout (std140, binding=1) uniform colorInfo {
+    vec4 uniformColor;
 };
 
 uniform vec3 equationUnit; // coordinates of the point in units
@@ -135,7 +154,8 @@ void main () {
 
     float alpha = 1 - smoothstep (radiusPix, radiusPix+1, distancePix);
 
-    color = vec4 (1,1,1,alpha);
+    color = uniformColor;
+    color.a *= alpha;
 }
 )";
 
@@ -148,6 +168,10 @@ layout (std140, binding=0) uniform drawInfo {
     vec2 centerUnit;
     vec2 frameDimentionsPix;
     float pixelsPerUnit;
+};
+
+layout (std140, binding=1) uniform colorInfo {
+    vec4 uniformColor;
 };
 
 uniform vec3 circleCenterAndRadiusUnit; // coordinates of the point in units
@@ -168,6 +192,7 @@ void main () {
 
     float alpha = 1 - smoothstep (lineRadiusPix, lineRadiusPix+1, distanceFromLinePix);
 
-    color = vec4 (1,1,1,alpha);
+    color = uniformColor;
+    color.a *= alpha;
 }
 )";

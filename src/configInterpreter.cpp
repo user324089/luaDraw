@@ -2,7 +2,11 @@
 #include <stdexcept>
 #include <string>
 
-configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage) : configuredShapeStorage (_configuredShapeStorage) {
+constexpr static std::size_t numberOfDefaultColors = 3;
+
+configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage)
+    : configuredShapeStorage (_configuredShapeStorage), configuredColorStorage (_configuredColorStorage){
+
     L = luaL_newstate();
     luaL_openlibs (L);
 
@@ -11,7 +15,19 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage) : 
     lua_pushlightuserdata (L, this);
     luaL_setfuncs (L, luaDrawModuleFunctions, 1);
 
+    lua_createtable (L, 0, numberOfDefaultColors); // colors table
+    lua_pushlightuserdata (L, this);
+    lua_pushcclosure (L, newColor, 1);
+    lua_setfield (L, -2, "newColor");
+
+    lua_setfield (L, -2, "colors");
+
     lua_setglobal (L, "luaDraw");
+
+    luaL_newmetatable (L, "luaDraw.color");
+    lua_pushlightuserdata (L, this);
+    luaL_setfuncs (L, colorMetaTableFunctions, 1);
+    lua_pop (L, 1);
 
     luaL_newmetatable (L, "luaDraw.point");
     lua_pushlightuserdata (L, this);
@@ -143,6 +159,10 @@ int configInterpreter::setPointField (lua_State * L) {
     } else if (field == "name") {
         p.name = luaL_checkstring (L, 3);
         return 0;
+    } else if (field == "color") {
+        int * colorIdPtr = static_cast<int*>(luaL_checkudata (L, 3, "luaDraw.color"));
+        p.color = *colorIdPtr;
+        return 0;
     }
     return 0;
 }
@@ -200,6 +220,10 @@ int configInterpreter::setLineField (lua_State * L) {
         return 0;
     } else if (field == "name") {
         l.name = luaL_checkstring (L, 3);
+        return 0;
+    } else if (field == "color") {
+        int * colorIdPtr = static_cast<int*>(luaL_checkudata (L, 3, "luaDraw.color"));
+        l.color = *colorIdPtr;
         return 0;
     }
     return 0;
@@ -259,6 +283,10 @@ int configInterpreter::setCircleField (lua_State * L) {
     } else if (field == "name") {
         c.name = luaL_checkstring (L, 3);
         return 0;
+    } else if (field == "color") {
+        int * colorIdPtr = static_cast<int*>(luaL_checkudata (L, 3, "luaDraw.color"));
+        c.color = *colorIdPtr;
+        return 0;
     }
     return 0;
 }
@@ -271,5 +299,70 @@ int configInterpreter::getTime (lua_State * L) {
     std::chrono::duration<double> passedTime {nowTime - self->startTime};
 
     lua_pushnumber (L, passedTime.count());
+    return 1;
+}
+
+int configInterpreter::newColor (lua_State * L) {
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    int newId = self->configuredColorStorage.newColor ();
+    int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(size_t)));
+    *idPtr = newId;
+    luaL_setmetatable (L, "luaDraw.color");
+    return 1;
+}
+
+int configInterpreter::setColorField (lua_State * L) {
+
+    int * idPtr = static_cast<int*>(luaL_checkudata (L, 1, "luaDraw.color"));
+
+    if (lua_type (L, 2) != LUA_TSTRING) {
+        return 0;
+    }
+
+    std::string field = lua_tostring(L, 2);
+
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    colorStorage::color& c = self->configuredColorStorage.getColor (*idPtr);
+
+    if (field == "r" ) {
+        c.colorComponents[0] = static_cast<float>(luaL_checknumber (L, 3));
+    } else if (field == "g") {
+        c.colorComponents[1] = static_cast<float>(luaL_checknumber (L, 3));
+    } else if (field == "b") {
+        c.colorComponents[2] = static_cast<float>(luaL_checknumber (L, 3));
+    } else if (field == "a") {
+        c.colorComponents[3] = static_cast<float>(luaL_checknumber (L, 3));
+    }
+    c.updateUniform();
+    return 0;
+}
+
+int configInterpreter::getColorField (lua_State * L) {
+    int * idPtr = static_cast<int*>(luaL_checkudata (L, 1, "luaDraw.color"));
+
+    if (lua_type (L, 2) != LUA_TSTRING) {
+        lua_pushnil (L);
+        return 1;
+    }
+
+    std::string field = lua_tostring(L, 2);
+
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    colorStorage::color& c = self->configuredColorStorage.getColor (*idPtr);
+
+    if (field == "r" ) {
+        lua_pushnumber (L, static_cast<double>(c.colorComponents[0]));
+        return 1;
+    } else if (field == "g") {
+        lua_pushnumber (L, static_cast<double>(c.colorComponents[1]));
+        return 1;
+    } else if (field == "b") {
+        lua_pushnumber (L, static_cast<double>(c.colorComponents[2]));
+        return 1;
+    } else if (field == "a") {
+        lua_pushnumber (L, static_cast<double>(c.colorComponents[3]));
+        return 1;
+    }
+    lua_pushnil (L);
     return 1;
 }

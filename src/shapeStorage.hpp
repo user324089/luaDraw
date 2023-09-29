@@ -7,14 +7,17 @@ class shapeStorage {
     public:
         struct point {
             float x = 0, y = 0;
+            int color = -1;
             std::string name = "";
         };
         struct line {
             float a = 1, b = 0, c = 0;
+            int color = -1;
             std::string name = "";
         };
         struct circle {
             float x = 0, y = 0, r = 1;
+            int color = -1;
             std::string name = "";
         };
     private:

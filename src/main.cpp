@@ -13,34 +13,6 @@
 constexpr static float arrowMoveSpeed = 500;
 constexpr static float scrollEnlargeSpeed = 1.3f;
 
-void drawShapes (shapeStorage & storage, shapeDrawer & drawer) {
-
-    shapeDrawer::circleDrawingData circleData;
-    circleData.pixelRadius = 10;
-    for (shapeStorage::circleIterator iter = storage.circleBegin(); iter != storage.circleEnd(); iter++) {
-        circleData.x = iter->x;
-        circleData.y = iter->y;
-        circleData.r = iter->r;
-        drawer.drawCircle (circleData);
-    }
-
-    shapeDrawer::lineDrawingData lineData;
-    lineData.pixelRadius = 10;
-    for (shapeStorage::lineIterator iter = storage.lineBegin(); iter != storage.lineEnd(); iter++) {
-        lineData.a = iter->a;
-        lineData.b = iter->b;
-        lineData.c = iter->c;
-        drawer.drawLine (lineData);
-    }
-
-    shapeDrawer::pointDrawingData pointData;
-    pointData.pixelRadius = 12;
-    for (shapeStorage::pointIterator iter = storage.pointBegin(); iter != storage.pointEnd(); iter++) {
-        pointData.x = iter->x;
-        pointData.y = iter->y;
-        drawer.drawPoint (pointData);
-    }
-}
 
 struct windowData {
     double scrolledX = 0, scrolledY = 0;
@@ -101,6 +73,11 @@ c1.x = 1
 c1.y = 1
 c1.r = 4
 
+col = luaDraw.colors.newColor ()
+col.r = 0.3
+col.g = 0.7
+c1.color = col
+
 function Update ()
     c1.x = luaDraw.getTime();
     c1.r = luaDraw.getTime();
@@ -110,8 +87,9 @@ function Update ()
 end
 )";
 
+    colorStorage mainColorStorage;
 
-    configInterpreter mainConfigInterpreter (mainShapeStorage);
+    configInterpreter mainConfigInterpreter (mainShapeStorage, mainColorStorage);
     mainConfigInterpreter.setupFromString (luaProgram);
 
     sd.setPixelsPerUnit (100);
@@ -163,7 +141,7 @@ end
         glClear (GL_COLOR_BUFFER_BIT);
 
         //drawShapes (ss, sd);
-        drawShapes (mainShapeStorage, sd);
+        sd.drawShapes (mainShapeStorage, mainColorStorage);
 
         glfwSwapBuffers (window);
     }

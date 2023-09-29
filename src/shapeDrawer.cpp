@@ -50,6 +50,10 @@ shapeDrawer::shapeDrawer () {
 
     circleProgramCenterAndRadiusUnitLocation = circleProgram.getUniformLocation ("circleCenterAndRadiusUnit");
     circleProgramLineRadiusPixLocation = circleProgram.getUniformLocation ("lineRadiusPix");
+
+    defaultColor.setComponents (defaultColorData);
+    borderColor.setComponents (borderColorData);
+
 }
 
 shapeDrawer::~shapeDrawer () {
@@ -114,4 +118,48 @@ void shapeDrawer::drawCircle (const circleDrawingData & data) {
     glUniform1f (circleProgramLineRadiusPixLocation, data.pixelRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void shapeDrawer::drawShapes (shapeStorage & drawnShapesStorage, colorStorage & usedColorStorage) {
+
+    shapeDrawer::circleDrawingData circleData;
+    circleData.pixelRadius = 10;
+    for (shapeStorage::circleIterator iter = drawnShapesStorage.circleBegin(); iter != drawnShapesStorage.circleEnd(); iter++) {
+        circleData.x = iter->x;
+        circleData.y = iter->y;
+        circleData.r = iter->r;
+        if (iter->color == -1) {
+            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        } else {
+            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        }
+        drawCircle (circleData);
+    }
+
+    shapeDrawer::lineDrawingData lineData;
+    lineData.pixelRadius = 10;
+    for (shapeStorage::lineIterator iter = drawnShapesStorage.lineBegin(); iter != drawnShapesStorage.lineEnd(); iter++) {
+        lineData.a = iter->a;
+        lineData.b = iter->b;
+        lineData.c = iter->c;
+        if (iter->color == -1) {
+            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        } else {
+            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        }
+        drawLine (lineData);
+    }
+
+    shapeDrawer::pointDrawingData pointData;
+    pointData.pixelRadius = 12;
+    for (shapeStorage::pointIterator iter = drawnShapesStorage.pointBegin(); iter != drawnShapesStorage.pointEnd(); iter++) {
+        pointData.x = iter->x;
+        pointData.y = iter->y;
+        if (iter->color == -1) {
+            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        } else {
+            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+        }
+        drawPoint (pointData);
+    }
 }
