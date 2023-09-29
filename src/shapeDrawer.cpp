@@ -2,6 +2,11 @@
 #include "frequentVerts.hpp"
 #include <cstring>
 
+extern const float totalPointRadius;
+extern const float totalLineRadius;
+extern const float totalCircleLineRadius;
+extern const float borderRadius;
+
 void shapeDrawer::updateUniformBuffer () {
     char bufferSubData [uniformBufferRequiredSize];
     std::memcpy (bufferSubData, &centerX, sizeof(GLfloat));
@@ -123,25 +128,35 @@ void shapeDrawer::drawCircle (const circleDrawingData & data) {
 void shapeDrawer::drawShapes (shapeStorage & drawnShapesStorage, colorStorage & usedColorStorage) {
 
     shapeDrawer::circleDrawingData circleData;
-    circleData.pixelRadius = 10;
     for (shapeStorage::circleIterator iter = drawnShapesStorage.circleBegin(); iter != drawnShapesStorage.circleEnd(); iter++) {
         circleData.x = iter->x;
         circleData.y = iter->y;
         circleData.r = iter->r;
+
+        circleData.pixelRadius = totalCircleLineRadius;
+        borderColor.bindToUnit (1);
+        drawCircle (circleData);
+
+        circleData.pixelRadius = totalCircleLineRadius - borderRadius;
         if (iter->color == -1) {
-            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+            defaultColor.bindToUnit (1);
         } else {
-            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
+            usedColorStorage.getColor (iter->color).bindToUnit (1);
         }
         drawCircle (circleData);
     }
 
     shapeDrawer::lineDrawingData lineData;
-    lineData.pixelRadius = 10;
     for (shapeStorage::lineIterator iter = drawnShapesStorage.lineBegin(); iter != drawnShapesStorage.lineEnd(); iter++) {
         lineData.a = iter->a;
         lineData.b = iter->b;
         lineData.c = iter->c;
+
+        lineData.pixelRadius = totalLineRadius;
+        borderColor.bindToUnit (1);
+        drawLine (lineData);
+
+        lineData.pixelRadius = totalLineRadius - borderRadius;
         if (iter->color == -1) {
             defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
         } else {
@@ -151,10 +166,15 @@ void shapeDrawer::drawShapes (shapeStorage & drawnShapesStorage, colorStorage & 
     }
 
     shapeDrawer::pointDrawingData pointData;
-    pointData.pixelRadius = 12;
     for (shapeStorage::pointIterator iter = drawnShapesStorage.pointBegin(); iter != drawnShapesStorage.pointEnd(); iter++) {
         pointData.x = iter->x;
         pointData.y = iter->y;
+
+        pointData.pixelRadius = totalPointRadius;
+        borderColor.bindToUnit (1);
+        drawPoint (pointData);
+
+        pointData.pixelRadius = totalPointRadius - borderRadius;
         if (iter->color == -1) {
             defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
         } else {

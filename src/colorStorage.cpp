@@ -17,6 +17,10 @@ void colorStorage::color::setComponents (const float * _colorComponents) {
     updateUniform ();
 }
 
+void colorStorage::color::bindToUnit (GLuint unit) {
+    uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, unit, 0, 16);
+}
+
 int colorStorage::newColor (float r, float g, float b, float a) {
     std::size_t id = availableColors.size();
     availableColors.emplace_back ();

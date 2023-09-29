@@ -11,6 +11,7 @@ class colorStorage {
             color ();
             void updateUniform ();
             void setComponents (const float * _colorComponents);
+            void bindToUnit (GLuint unit);
         };
     private:
         std::vector<color> availableColors;
