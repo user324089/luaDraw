@@ -10,8 +10,8 @@
 #include "inputHandlers.hpp"
 #include <cmath>
 
-constexpr static float arrowMoveSpeed = 500;
-constexpr static float scrollEnlargeSpeed = 1.3f;
+extern const float arrowMoveSpeed;
+extern const float scrollEnlargeSpeed;
 
 
 struct windowData {

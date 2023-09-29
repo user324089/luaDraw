@@ -6,8 +6,8 @@
 #include "shapeStorage.hpp"
 #include "colorStorage.hpp"
 
-constexpr float borderColorData [4] = {0.3f,0.3f,0.3f,1};
-constexpr float defaultColorData [4] = {1,0,1,1};
+extern const float borderColorData [4];
+extern const float defaultColorData [4];
 
 class shapeDrawer {
     private:
