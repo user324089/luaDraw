@@ -3,7 +3,7 @@ target_include_directories (main PRIVATE ${GLFW_INCLUDE_DIR} ${GLEW_INCLUDE_DIR}
 target_link_libraries (main glfw glew_s ${OPENGL_LIBRARIES} ${MY_OPENGL_WRAPPER_LIBRARIES} ${LUA_LIBRARIES})
 target_compile_definitions (main PRIVATE GLEW_NO_GLU)
 target_compile_features(main PRIVATE cxx_std_17)
-set_target_properties (main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${LUADRAW_OUTPUT_DIR})
+set_target_properties (main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set (MSVCDebugCompileFlags /Od /Zi /W4)
 set (MSVCReleaseCompileFlags /Ot)
