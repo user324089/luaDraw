@@ -6,6 +6,10 @@ set_target_properties (constructions PROPERTIES
     PREFIX ""
     )
 
+if (WIN32)
+    target_link_libraries (constructions ${LUA_LIBRARIES})
+endif ()
+
 set (MSVCDebugCompileFlags /Od /Zi /W4)
 set (MSVCReleaseCompileFlags /Ot)
 
