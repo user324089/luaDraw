@@ -5,6 +5,7 @@ target_compile_features(constructions PRIVATE cxx_std_17)
 set_target_properties (constructions PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:main>
     PREFIX ""
+    POSITION_INDEPENDENT_CODE ON
     )
 
 set (MSVCDebugCompileFlags /Od /Zi /W4)
