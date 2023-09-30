@@ -42,6 +42,8 @@ class shapeDrawer {
 
         colorStorage::color defaultColor;
         colorStorage::color borderColor;
+        template <typename SHAPE_TYPE>
+            void drawOneShape (const SHAPE_TYPE & shape, void (shapeDrawer::* drawFunc) (const SHAPE_TYPE&, float), colorStorage & usedColorStorage, float totalRadius);
     public:
         shapeDrawer ();
         ~shapeDrawer ();
@@ -51,21 +53,10 @@ class shapeDrawer {
         void setFrameDimentions (float _frameWidth, float _frameHeight);
         void setPixelsPerUnit (float _pixelsPerUnit);
         void enlargeView (float times);
-        struct pointDrawingData {
-            float x, y;
-            float pixelRadius;
-        };
-        void drawPoint (const pointDrawingData & data);
-        struct lineDrawingData {
-            float a, b, c;
-            float pixelRadius;
-        };
-        void drawLine (const lineDrawingData & data);
-        struct circleDrawingData {
-            float x, y, r;
-            float pixelRadius;
-        };
-        void drawCircle (const circleDrawingData & data);
+
+        void drawPoint (const shapeStorage::point & pt, float pixRadius);
+        void drawLine (const shapeStorage::line & lin, float pixRadius);
+        void drawCircle (const shapeStorage::circle & circ, float pixRadius);
 
         void drawShapes (shapeStorage & drawnShapesStorage, colorStorage & usedColorStorage);
 };

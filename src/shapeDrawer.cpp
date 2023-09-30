@@ -1,6 +1,8 @@
 #include "shapeDrawer.hpp"
 #include "frequentVerts.hpp"
 #include <cstring>
+#include <algorithm>
+#include <functional>
 
 extern const float totalPointRadius;
 extern const float totalLineRadius;
@@ -95,91 +97,60 @@ void shapeDrawer::enlargeView (float times) {
     pixelsPerUnit *= times;
 }
 
-void shapeDrawer::drawPoint (const pointDrawingData & data) {
+void shapeDrawer::drawPoint (const shapeStorage::point & pt, float pixRadius) {
     updateUniformBuffer ();
     uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);
     pointProgram.use ();
-    glUniform2f (pointProgramPointUnitLocation, data.x, data.y);
-    glUniform1f (pointProgramRadiusPixLocation, data.pixelRadius);
+    glUniform2f (pointProgramPointUnitLocation, pt.x, pt.y);
+    glUniform1f (pointProgramRadiusPixLocation, pixRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void shapeDrawer::drawLine (const lineDrawingData & data) {
+void shapeDrawer::drawLine (const shapeStorage::line & lin, float pixRadius) {
     updateUniformBuffer ();
     uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);
     lineProgram.use ();
-    glUniform3f (lineProgramEquationUnitLocation, data.a, data.b, data.c);
-    glUniform1f (lineProgramRadiusPixLocation, data.pixelRadius);
+    glUniform3f (lineProgramEquationUnitLocation, lin.a, lin.b, lin.c);
+    glUniform1f (lineProgramRadiusPixLocation, pixRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void shapeDrawer::drawCircle (const circleDrawingData & data) {
+void shapeDrawer::drawCircle (const shapeStorage::circle & circ, float pixRadius) {
     updateUniformBuffer ();
     uniformBuffer.bindRange (GL_UNIFORM_BUFFER, 0, 0, uniformBufferRequiredSize);
     circleProgram.use ();
-    glUniform3f (circleProgramCenterAndRadiusUnitLocation, data.x, data.y, data.r);
-    glUniform1f (circleProgramLineRadiusPixLocation, data.pixelRadius);
+    glUniform3f (circleProgramCenterAndRadiusUnitLocation, circ.x, circ.y, circ.r);
+    glUniform1f (circleProgramLineRadiusPixLocation, pixRadius);
     glBindVertexArray (VAO);
     glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+}
+
+template <typename SHAPE_TYPE>
+void shapeDrawer::drawOneShape (const SHAPE_TYPE & shape, void (shapeDrawer::* drawFunc) (const SHAPE_TYPE&, float), colorStorage & usedColorStorage, float totalRadius) {
+    borderColor.bindToUnit (1);
+    (this->*drawFunc) (shape, totalRadius);
+
+    if (shape.color == -1) {
+        defaultColor.bindToUnit (1);
+    } else {
+        usedColorStorage.getColor (shape.color).bindToUnit (1);
+    }
+    (this->*drawFunc) (shape, totalRadius - borderRadius);
 }
 
 void shapeDrawer::drawShapes (shapeStorage & drawnShapesStorage, colorStorage & usedColorStorage) {
 
-    shapeDrawer::circleDrawingData circleData;
-    for (shapeStorage::circleIterator iter = drawnShapesStorage.circleBegin(); iter != drawnShapesStorage.circleEnd(); iter++) {
-        circleData.x = iter->x;
-        circleData.y = iter->y;
-        circleData.r = iter->r;
+    std::for_each (drawnShapesStorage.circleBegin(), drawnShapesStorage.circleEnd(), [&] (auto& circ) {
+            drawOneShape (circ, &shapeDrawer::drawCircle, usedColorStorage, totalCircleLineRadius);
+            });
 
-        circleData.pixelRadius = totalCircleLineRadius;
-        borderColor.bindToUnit (1);
-        drawCircle (circleData);
+    std::for_each (drawnShapesStorage.lineBegin(), drawnShapesStorage.lineEnd(), [&] (auto& lin) {
+            drawOneShape (lin, &shapeDrawer::drawLine, usedColorStorage, totalLineRadius);
+            });
 
-        circleData.pixelRadius = totalCircleLineRadius - borderRadius;
-        if (iter->color == -1) {
-            defaultColor.bindToUnit (1);
-        } else {
-            usedColorStorage.getColor (iter->color).bindToUnit (1);
-        }
-        drawCircle (circleData);
-    }
-
-    shapeDrawer::lineDrawingData lineData;
-    for (shapeStorage::lineIterator iter = drawnShapesStorage.lineBegin(); iter != drawnShapesStorage.lineEnd(); iter++) {
-        lineData.a = iter->a;
-        lineData.b = iter->b;
-        lineData.c = iter->c;
-
-        lineData.pixelRadius = totalLineRadius;
-        borderColor.bindToUnit (1);
-        drawLine (lineData);
-
-        lineData.pixelRadius = totalLineRadius - borderRadius;
-        if (iter->color == -1) {
-            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
-        } else {
-            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
-        }
-        drawLine (lineData);
-    }
-
-    shapeDrawer::pointDrawingData pointData;
-    for (shapeStorage::pointIterator iter = drawnShapesStorage.pointBegin(); iter != drawnShapesStorage.pointEnd(); iter++) {
-        pointData.x = iter->x;
-        pointData.y = iter->y;
-
-        pointData.pixelRadius = totalPointRadius;
-        borderColor.bindToUnit (1);
-        drawPoint (pointData);
-
-        pointData.pixelRadius = totalPointRadius - borderRadius;
-        if (iter->color == -1) {
-            defaultColor.uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
-        } else {
-            usedColorStorage.getColor (iter->color).uniformColorBuffer.bindRange (GL_UNIFORM_BUFFER, 1, 0, 16);
-        }
-        drawPoint (pointData);
-    }
+    std::for_each (drawnShapesStorage.pointBegin(), drawnShapesStorage.pointEnd(), [&] (auto& pt) {
+            drawOneShape (pt, &shapeDrawer::drawPoint, usedColorStorage, totalPointRadius);
+            });
 }
