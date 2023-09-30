@@ -52,47 +52,10 @@ int main () {
 
     glfwSetScrollCallback(window, scroll_callback);
 
-    const char * luaProgram = R"(
-pt = luaDraw.newPoint();
-print('printing pt.x', pt.x)
-pt.x = 1.3;
-print('printing pt.x', pt.x)
-
-pt2 = luaDraw.newPoint();
-print('printing pt2.x', pt2.x)
-pt2.x = -3.2;
-print('printing pt2.x', pt2.x)
-
-l1 = luaDraw.newLine();
-l1.a = 1
-l1.b = 0.1
-l1.c = 0
-
-c1 = luaDraw.newCircle()
-c1.x = 1
-c1.y = 1
-c1.r = 4
-
-col = luaDraw.colors.newColor ()
-col.r = 0.3
-col.g = 0.7
-c1.color = col
-
-pt.color = luaDraw.colors.brown
-
-function Update ()
-    c1.x = luaDraw.getTime();
-    c1.r = luaDraw.getTime();
-    pt3 = luaDraw.newPoint ();
-    pt3.x = c1.x;
-    pt3.y = c1.y;
-end
-)";
-
     colorStorage mainColorStorage;
 
     configInterpreter mainConfigInterpreter (mainShapeStorage, mainColorStorage);
-    mainConfigInterpreter.setupFromString (luaProgram);
+    mainConfigInterpreter.setupFromFile ("script.lua");
 
     sd.setPixelsPerUnit (100);
 
