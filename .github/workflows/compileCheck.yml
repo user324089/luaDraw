@@ -25,7 +25,7 @@ jobs:
       run: cmake -B build -S . -DCMAKE_PREFIX_PATH="/home/runner/work/luaDraw/luaDraw/.lua/" -DCMAKE_BUILD_TYPE=Debug
 
     - name: compile
-      run: cmake --build build
+      run: cmake --build build --config Debug
 
   buildReleaseLinux:
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
       run: cmake -B build -S . -DCMAKE_PREFIX_PATH="/home/runner/work/luaDraw/luaDraw/.lua/" -DCMAKE_BUILD_TYPE=Release
 
     - name: compile
-      run: cmake --build build
+      run: cmake --build build --config Release
 
   buildDebugWindows:
 
@@ -73,7 +73,7 @@ jobs:
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 
     - name: compile
-      run: cmake --build build
+      run: cmake --build build --config Debug
 
   buildReleaseWindows:
 
@@ -97,4 +97,4 @@ jobs:
       run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 
     - name: compile
-      run: cmake --build build
+      run: cmake --build build --config Release
