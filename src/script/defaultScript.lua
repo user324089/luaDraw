@@ -24,6 +24,11 @@ pt.color = luaDraw.colors.brown
 local horizontal = luaDraw.newLine ({a=0, b = 1, c = 0})
 horizontal.color = luaDraw.colors.yellow
 
+local pt4 = luaDraw.newPoint ({x = -1, y = 1})
+
+local linePtPt4 = constructions.lineThroughTwoPoints (pt, pt4);
+linePtPt4.color = luaDraw.colors.green
+
 function Update ()
     c1.x = luaDraw.getTime();
     c1.y = luaDraw.getTime();
