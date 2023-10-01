@@ -1,6 +1,8 @@
 local constructions = require "constructions"
 
-print ('test func output: ', constructions.testFunc())
+local testCirc = constructions.testFunc()
+print (testCirc.x, testCirc.y, testCirc.r)
+print ("type of testCirc is ", type(testCirc))
 
 local pt = luaDraw.newPoint();
 print('printing pt.x', pt.x)

@@ -83,6 +83,9 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, co
 
     lua_setfield (L, -2, "colors");
 
+    lua_pushvalue (L, -1);
+    lua_setfield (L, LUA_REGISTRYINDEX, "luaDraw");
+
     lua_setglobal (L, "luaDraw");
 
 }
