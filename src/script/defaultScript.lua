@@ -4,9 +4,7 @@ local testCirc = constructions.testFunc()
 print (testCirc.x, testCirc.y, testCirc.r)
 print ("type of testCirc is ", type(testCirc))
 
-local pt = luaDraw.newPoint();
-print('printing pt.x', pt.x)
-pt.x = 1.3;
+local pt = luaDraw.newPoint({x = 1.4, y = 0});
 print('printing pt.x', pt.x)
 
 local pt2 = luaDraw.newPoint();
@@ -14,22 +12,17 @@ print('printing pt2.x', pt2.x)
 pt2.x = -3.2;
 print('printing pt2.x', pt2.x)
 
-local l1 = luaDraw.newLine();
-l1.a = 1
-l1.b = 0.1
-l1.c = 0
+local l1 = luaDraw.newLine({a=1, b=0.1, c=0})
 
-local c1 = luaDraw.newCircle()
-c1.x = 1
-c1.y = 1
-c1.r = 4
+local c1 = luaDraw.newCircle({x=1, y=1, r=4})
 
-local col = luaDraw.colors.newColor ()
-col.r = 0.3
-col.g = 0.7
+local col = luaDraw.colors.newColor ({r=1,g=0.6,b=0.6})
 c1.color = col
 
 pt.color = luaDraw.colors.brown
+
+local horizontal = luaDraw.newLine ({a=0, b = 1, c = 0})
+horizontal.color = luaDraw.colors.yellow
 
 function Update ()
     c1.x = luaDraw.getTime();

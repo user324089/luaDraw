@@ -21,19 +21,10 @@ constexpr static startingAvailableColor allStartingAvailableColors [] = {
 
 constexpr static float defaultNewColor [] = {0,0,0,1};
 static void luaPushNewColor (lua_State * L, colorStorage & configuredColorStorage, const float * colorData = defaultNewColor) {
-    int newId = configuredColorStorage.newColor ();
-    int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(size_t)));
+    int newId = configuredColorStorage.newColor (colorData[0], colorData[1], colorData[2], colorData[3]);
+    int * idPtr = static_cast<int*>(lua_newuserdata(L, sizeof(int)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.color");
-
-    lua_pushnumber (L, static_cast<double>(colorData[0]));
-    lua_setfield (L, -2, "r");
-    lua_pushnumber (L, static_cast<double>(colorData[1]));
-    lua_setfield (L, -2, "g");
-    lua_pushnumber (L, static_cast<double>(colorData[2]));
-    lua_setfield (L, -2, "b");
-    lua_pushnumber (L, static_cast<double>(colorData[3]));
-    lua_setfield (L, -2, "a");
 
     lua_pushvalue (L, -1);
     configuredColorStorage.getColor (newId).luaIndex = luaL_ref (L, LUA_REGISTRYINDEX);
@@ -130,29 +121,93 @@ configInterpreter::~configInterpreter () {
 }
 
 int configInterpreter::newPoint (lua_State * L) {
+
+    bool isConstructedFromTable = (lua_gettop (L) > 0);
+    if (isConstructedFromTable) {
+        luaL_checktype (L, 1, LUA_TTABLE);
+    }
+
     configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
     std::size_t newId = self->configuredShapeStorage.newPoint();
+    shapeStorage::point & createdPoint = self->configuredShapeStorage.getPoint (newId);
+
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.point");
+
+    if (isConstructedFromTable) {
+        lua_getfield (L, 1, "x");
+        createdPoint.x = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+
+        lua_getfield (L, 1, "y");
+        createdPoint.y = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+    }
     return 1;
 }
 
 int configInterpreter::newLine (lua_State * L) {
+
+    bool isConstructedFromTable = (lua_gettop (L) > 0);
+
+    if (isConstructedFromTable) {
+        luaL_checktype (L, 1, LUA_TTABLE);
+    }
+
     configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
     std::size_t newId = self->configuredShapeStorage.newLine();
+    shapeStorage::line & createdLine = self->configuredShapeStorage.getLine (newId);
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.line");
+
+    if (isConstructedFromTable) {
+        lua_getfield (L, 1, "a");
+        createdLine.a = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+
+        lua_getfield (L, 1, "b");
+        createdLine.b = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+
+        lua_getfield (L, 1, "c");
+        createdLine.c = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+    }
+
     return 1;
 }
 
 int configInterpreter::newCircle (lua_State * L) {
+
+    bool isConstructedFromTable = (lua_gettop (L) > 0);
+
+    if (isConstructedFromTable) {
+        luaL_checktype (L, 1, LUA_TTABLE);
+    }
+
     configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
     std::size_t newId = self->configuredShapeStorage.newCircle();
+    shapeStorage::circle & createdCircle = self->configuredShapeStorage.getCircle (newId);
     std::size_t * idPtr = static_cast<size_t*>(lua_newuserdata(L, sizeof(size_t)));
     *idPtr = newId;
     luaL_setmetatable (L, "luaDraw.circle");
+
+    if (isConstructedFromTable) {
+        lua_getfield (L, 1, "x");
+        createdCircle.y = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+
+        lua_getfield (L, 1, "y");
+        createdCircle.y = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+
+        lua_getfield (L, 1, "r");
+        createdCircle.r = static_cast<float>(luaL_checknumber (L, -1));
+        lua_pop (L, 1);
+    }
+
     return 1;
 }
 
@@ -368,10 +423,33 @@ int configInterpreter::getTime (lua_State * L) {
     return 1;
 }
 
+static float getNumberFieldOrDefault (lua_State * L, const char * field, float def) {
+    lua_getfield (L, -1, field);
+    if (lua_isnil (L, -1)) {
+        lua_pop (L, 1);
+        return def;
+    }
+    double result = luaL_checknumber (L, -1);
+    lua_pop (L, 1);
+    return static_cast<float>(result);
+}
 
 int configInterpreter::newColor (lua_State * L) {
     configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
-    luaPushNewColor (L, self->configuredColorStorage);
+    if (lua_gettop (L) == 0) {
+        luaPushNewColor (L, self->configuredColorStorage);
+    } else {
+        luaL_checktype (L, 1, LUA_TTABLE);
+
+        float colorData [4] = {
+            getNumberFieldOrDefault(L, "r", 0),
+            getNumberFieldOrDefault(L, "g", 0),
+            getNumberFieldOrDefault(L, "b", 0),
+            getNumberFieldOrDefault(L, "a", 1)
+        };
+
+        luaPushNewColor (L, self->configuredColorStorage, colorData);
+    }
 
     return 1;
 }
