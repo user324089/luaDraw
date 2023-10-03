@@ -50,6 +50,7 @@ class configInterpreter {
 
     public:
         configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage);
+        void initializeDefaultColors ();
         void setupFromString (const std::string luaText);
         void setupFromFile (const std::string filename);
         void update ();

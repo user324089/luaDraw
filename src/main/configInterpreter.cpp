@@ -30,6 +30,17 @@ static void luaPushNewColor (lua_State * L, colorStorage & configuredColorStorag
     configuredColorStorage.getColor (newId).luaIndex = luaL_ref (L, LUA_REGISTRYINDEX);
 }
 
+void configInterpreter::initializeDefaultColors () {
+    lua_getfield (L, LUA_REGISTRYINDEX, "luaDraw");
+    lua_getfield (L, -1, "colors");
+    int numStartingAvailableColors = sizeof(allStartingAvailableColors)/sizeof(startingAvailableColor);
+    for (int i = 0; i < numStartingAvailableColors; i++) {
+        luaPushNewColor (L, configuredColorStorage, allStartingAvailableColors[i].data);
+        lua_setfield (L, -2, allStartingAvailableColors[i].name);
+    }
+    lua_pop (L, 2);
+}
+
 configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage)
     : configuredShapeStorage (_configuredShapeStorage), configuredColorStorage (_configuredColorStorage){
 
@@ -66,11 +77,6 @@ configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, co
     lua_pushlightuserdata (L, this);
     lua_pushcclosure (L, newColor, 1);
     lua_setfield (L, -2, "newColor");
-
-    for (int i = 0; i < numStartingAvailableColors; i++) {
-        luaPushNewColor (L, configuredColorStorage, allStartingAvailableColors[i].data);
-        lua_setfield (L, -2, allStartingAvailableColors[i].name);
-    }
 
     lua_setfield (L, -2, "colors");
 
