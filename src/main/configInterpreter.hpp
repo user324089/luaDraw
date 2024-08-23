@@ -2,6 +2,7 @@
 
 #include "shapeStorage.hpp"
 #include "colorStorage.hpp"
+#include "callbackStorage.hpp"
 #include <chrono>
 
 extern "C" {
@@ -18,6 +19,8 @@ class configInterpreter {
 
         colorStorage & configuredColorStorage;
 
+        callbackStorage & configuredCallbackStorage;
+
         static int newPoint (lua_State * L);
         static int newLine (lua_State * L);
         static int newCircle (lua_State * L);
@@ -31,6 +34,8 @@ class configInterpreter {
         static int setCircleField (lua_State * L);
 
         static int getTime (lua_State * L);
+
+        static int setCallback (lua_State * L);
 
         static int newColor (lua_State * L);
 
@@ -49,7 +54,8 @@ class configInterpreter {
         std::chrono::time_point<std::chrono::high_resolution_clock> startTime = std::chrono::high_resolution_clock::now();
 
     public:
-        configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage);
+        configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage,
+                callbackStorage & _configuredCallbackStorage);
         void initializeDefaultColors ();
         void setupFromString (const std::string luaText);
         void setupFromFile (const std::string filename);
@@ -63,6 +69,7 @@ inline constexpr luaL_Reg configInterpreter::luaDrawModuleFunctions [] = {
     {"newLine", newLine},
     {"newCircle", newCircle},
     {"getTime", getTime},
+    {"setCallback", setCallback},
     {NULL, NULL}
 };
 

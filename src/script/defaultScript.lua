@@ -29,6 +29,10 @@ local pt4 = luaDraw.newPoint ({x = -1, y = 1})
 local linePtPt4 = constructions.lineThroughTwoPoints (pt, pt4);
 linePtPt4.color = luaDraw.colors.green
 
+luaDraw.setCallback ('x', function ()
+    pt2.x = pt2.x + 1;
+end)
+
 function Update ()
     c1.x = luaDraw.getTime();
     c1.y = luaDraw.getTime();

@@ -16,13 +16,15 @@ class luaDraw {
         std::unique_ptr <shapeDrawer> mainShapeDrawer = nullptr; // pointer necessary to deffer initialization
         shapeStorage mainShapeStorage;
         colorStorage mainColorStorage;
+        callbackStorage mainCallbackStorage;
 
-        configInterpreter mainConfigInterpreter {mainShapeStorage, mainColorStorage};
+        configInterpreter mainConfigInterpreter {mainShapeStorage, mainColorStorage, mainCallbackStorage};
 
         timePassedHandler mainTimePassedHandler {glfwGetTime()};
         mouseMoveHandler mainMouseMoveHandler;
 
-        static void scroll_callback(GLFWwindow* window, [[maybe_unused]] double xoffset, double yoffset);
+        static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+        static void keyCallback (GLFWwindow* window, int key, int scancode, int action, int mods);
     public:
         luaDraw ();
         bool shouldClose ();

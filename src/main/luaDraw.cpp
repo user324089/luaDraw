@@ -9,6 +9,14 @@ void luaDraw::scroll_callback(GLFWwindow* window, [[maybe_unused]] double xoffse
     self->mainShapeDrawer->enlargeView (static_cast<float>(std::pow(scrollEnlargeSpeed, yoffset)));
 }
 
+void luaDraw::keyCallback (GLFWwindow* window, int key, int, int action, int) {
+    luaDraw * self = static_cast<luaDraw*>(glfwGetWindowUserPointer (window));
+    if (action != GLFW_PRESS) return;
+    if (GLFW_KEY_A <= key && key <= GLFW_KEY_Z) {
+        self->mainCallbackStorage.call ('A' + static_cast<char>(key - GLFW_KEY_A));
+    }
+}
+
 luaDraw::luaDraw () {
     glfwInit ();
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -27,6 +35,7 @@ luaDraw::luaDraw () {
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback (window, keyCallback);
 
     mainConfigInterpreter.initializeDefaultColors ();
     mainConfigInterpreter.setupFromFile ("script.lua");

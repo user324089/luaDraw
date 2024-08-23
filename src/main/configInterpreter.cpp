@@ -41,10 +41,13 @@ void configInterpreter::initializeDefaultColors () {
     lua_pop (L, 2);
 }
 
-configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage, colorStorage & _configuredColorStorage)
-    : configuredShapeStorage (_configuredShapeStorage), configuredColorStorage (_configuredColorStorage){
+configInterpreter::configInterpreter (shapeStorage & _configuredShapeStorage,
+        colorStorage & _configuredColorStorage, callbackStorage & _configuredCallbackStorage)
+    : configuredShapeStorage (_configuredShapeStorage),
+    configuredColorStorage (_configuredColorStorage),
+    configuredCallbackStorage (_configuredCallbackStorage) {
 
-    L = luaL_newstate();
+        L = luaL_newstate();
     luaL_openlibs (L);
 
     luaL_newmetatable (L, "luaDraw.color");
@@ -427,6 +430,25 @@ int configInterpreter::getTime (lua_State * L) {
 
     lua_pushnumber (L, passedTime.count());
     return 1;
+}
+
+static char toUpper (char c) {
+    return c & ~('a' ^ 'A');
+}
+
+static bool isLetter (char c) {
+    return (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z'));
+}
+
+int configInterpreter::setCallback (lua_State * L) {
+    configInterpreter * self = static_cast<configInterpreter*>(lua_touserdata (L, lua_upvalueindex(1)));
+    const char * key = luaL_checkstring (L, 1);
+    luaL_argcheck (L, key[1] == 0 && isLetter (key[0]), 1, "key must be single letter");
+    luaL_checktype (L, 2, LUA_TFUNCTION);
+
+    lua_pushvalue (L, 2);
+    self->configuredCallbackStorage.addCallbackFromStack (L, toUpper(key[0]));
+    return 0;
 }
 
 static float getNumberFieldOrDefault (lua_State * L, const char * field, float def) {
